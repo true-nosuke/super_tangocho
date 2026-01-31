@@ -1,13 +1,10 @@
 
 // *選択しているセルのB列をC列に翻訳する関数
 function TranslateEngToJpn(){
-  
-    const ss = SpreadsheetApp.getActiveSpreadsheet(); // アクティブなシートを取得
-    const sheet = ss.getActiveSheet();
+    const sheet = SpreadsheetApp.getActiveSpreadsheet(); // アクティブなシートを取得
     const english = sheet.getActiveRange().getValue();
     console.log(english);
     const japanese = LanguageApp.translate(english, "en", "ja");
-    console.log(japanese);
     sheet.getActiveRange().offset(0, 1).setValue(japanese);
 }
 // *選択しているシートのB列をC列に翻訳する関数
@@ -18,17 +15,3 @@ function TranslateEngToJpnAll(){
     const japanese = LanguageApp.translate(english, "en", "ja");
     sheet.getActiveRange().offset(0, 1).setValue(japanese);
 }
-
-// * 練習：選択しているセル（B列）をC列にコピーする関数
-function copyBtoC(){
-    const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-    const selectedRange = sheet.getActiveRange();
-    if (selectedRange.getColumn() !== 2) { // B列が選択されているか確認
-        return;
-    }
-
-    const english = sheet.getActiveRange().getValue();
-    
-    sheet.getActiveRange().offset(0, 1).setValue(english);
-}
-

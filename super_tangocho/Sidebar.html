@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <style>
+    body {
+      font-family: 'メイリオ', Meiryo, sans-serif;
+      padding: 15px;
+      margin: 0;
+      background-color: #f5f5f5;
+    }
+    
+    .section {
+      background: white;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    h3 {
+      margin-top: 0;
+      color: #1a73e8;
+      font-size: 16px;
+      border-bottom: 2px solid #1a73e8;
+      padding-bottom: 5px;
+    }
+    
+    button {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0;
+      border: none;
+      border-radius: 4px;
+      background-color: #1a73e8;
+      color: white;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    
+    button:hover {
+      background-color: #1557b0;
+    }
+    
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+    
+    .btn-secondary {
+      background-color: #34a853;
+    }
+    
+    .btn-secondary:hover {
+      background-color: #2d8e47;
+    }
+    
+    .btn-danger {
+      background-color: #ea4335;
+    }
+    
+    .btn-danger:hover {
+      background-color: #d33426;
+    }
+    
+    label {
+      display: block;
+      margin: 10px 0 5px 0;
+      font-size: 13px;
+      color: #555;
+    }
+    
+    select, input[type="number"] {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 13px;
+      box-sizing: border-box;
+    }
+    
+    .reading-list {
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 10px;
+      margin: 10px 0;
+      background-color: #fafafa;
+      min-height: 100px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    
+    .reading-item {
+      background: white;
+      padding: 8px;
+      margin: 5px 0;
+      border-radius: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .reading-item button {
+      width: auto;
+      padding: 5px 10px;
+      margin: 0;
+      font-size: 12px;
+    }
+    
+    .checkbox-group {
+      margin: 10px 0;
+    }
+    
+    .checkbox-group label {
+      display: inline;
+      margin-left: 5px;
+    }
+    
+    .status {
+      padding: 8px;
+      margin: 10px 0;
+      border-radius: 4px;
+      font-size: 12px;
+      display: none;
+    }
+    
+    .status.success {
+      background-color: #d4edda;
+      color: #155724;
+      display: block;
+    }
+    
+    .status.error {
+      background-color: #f8d7da;
+      color: #721c24;
+      display: block;
+    }
+    
+    .controls {
+      display: flex;
+      gap: 5px;
+      margin-top: 10px;
+    }
+    
+    .controls button {
+      flex: 1;
+    }
+  </style>
+</head>
+<body>
+  <!-- 翻訳セクション -->
+  <div class="section">
+    <h3>📝 翻訳機能</h3>
+    <button onclick="translateSheet()">シート全体の空白を翻訳</button>
+    <button onclick="translateSelection()">選択範囲を翻訳</button>
+    <div id="translateStatus" class="status"></div>
+  </div>
+  
+  <!-- 例文生成セクション -->
+  <div class="section">
+    <h3>💡 例文生成</h3>
+    <button class="btn-secondary" onclick="generateExamples()">例文を自動生成</button>
+    <div id="exampleStatus" class="status"></div>
+  </div>
+  
+  <!-- 読み上げセクション -->
+  <div class="section">
+    <h3>🔊 読み上げ機能</h3>
+    
+    <label>読み上げ範囲</label>
+    <select id="readingScope">
+      <option value="selection">選択中のセル</option>
+      <option value="sheet">シート全体</option>
+    </select>
+    
+    <label>読み上げ項目</label>
+    <div class="checkbox-group">
+      <input type="checkbox" id="readEnglish" checked>
+      <label for="readEnglish">英語</label>
+    </div>
+    <div class="checkbox-group">
+      <input type="checkbox" id="readEnglishSlow">
+      <label for="readEnglishSlow">英語（遅め）</label>
+    </div>
+    <div class="checkbox-group">
+      <input type="checkbox" id="readJapanese">
+      <label for="readJapanese">日本語訳</label>
+    </div>
+    <div class="checkbox-group">
+      <input type="checkbox" id="readExample">
+      <label for="readExample">例文</label>
+    </div>
+    <div class="checkbox-group">
+      <input type="checkbox" id="readExampleJp">
+      <label for="readExampleJp">例文（日本語訳）</label>
+    </div>
+    
+    <label>英語速度</label>
+    <input type="number" id="englishSpeed" min="0.5" max="2" step="0.1" value="1.0">
+    
+    <label>英語（遅め）速度</label>
+    <input type="number" id="englishSlowSpeed" min="0.5" max="2" step="0.1" value="0.7">
+    
+    <label>間隔（秒）</label>
+    <input type="number" id="pauseDuration" min="0" max="10" step="0.5" value="1.0">
+    
+    <div class="controls">
+      <button class="btn-secondary" onclick="startReading()">▶ 再生</button>
+      <button class="btn-danger" onclick="stopReading()">⏹ 停止</button>
+    </div>
+    
+    <div id="readingStatus" class="status"></div>
+  </div>
+  
+  <!-- チャレンジセクション -->
+  <div class="section">
+    <h3>🎯 ４択チャレンジ</h3>
+    <button onclick="openChallenge()">チャレンジを開始</button>
+  </div>
+
+  <script>
+    let isReading = false;
+    let currentIndex = 0;
+    let wordsToRead = [];
+    
+    // 翻訳機能
+    function translateSheet() {
+      showStatus('translateStatus', '翻訳中...', 'success');
+      google.script.run
+        .withSuccessHandler(function(count) {
+          showStatus('translateStatus', `${count}件の翻訳が完了しました`, 'success');
+        })
+        .withFailureHandler(function(error) {
+          showStatus('translateStatus', 'エラー: ' + error.message, 'error');
+        })
+        .translateEmptyJapaneseCells();
+    }
+    
+    function translateSelection() {
+      showStatus('translateStatus', '翻訳中...', 'success');
+      google.script.run
+        .withSuccessHandler(function() {
+          showStatus('translateStatus', '翻訳が完了しました', 'success');
+        })
+        .withFailureHandler(function(error) {
+          showStatus('translateStatus', 'エラー: ' + error.message, 'error');
+        })
+        .translateSelectedCells();
+    }
+    
+    // 例文生成
+    function generateExamples() {
+      showStatus('exampleStatus', '例文を生成中...（時間がかかる場合があります）', 'success');
+      google.script.run
+        .withSuccessHandler(function() {
+          showStatus('exampleStatus', '例文生成が完了しました', 'success');
+        })
+        .withFailureHandler(function(error) {
+          showStatus('exampleStatus', 'エラー: ' + error.message, 'error');
+        })
+        .generateExamplesForSelected();
+    }
+    
+    // 読み上げ機能
+    function startReading() {
+      if (isReading) {
+        showStatus('readingStatus', '既に再生中です', 'error');
+        return;
+      }
+      
+      const scope = document.getElementById('readingScope').value;
+      
+      showStatus('readingStatus', 'データを取得中...', 'success');
+      
+      google.script.run
+        .withSuccessHandler(function(words) {
+          if (!words || words.length === 0) {
+            showStatus('readingStatus', 'データがありません', 'error');
+            return;
+          }
+          
+          wordsToRead = words;
+          currentIndex = 0;
+          isReading = true;
+          readNextWord();
+        })
+        .withFailureHandler(function(error) {
+          showStatus('readingStatus', 'エラー: ' + error.message, 'error');
+        })
+        .getWordsForReading(scope);
+    }
+    
+    function readNextWord() {
+      if (!isReading || currentIndex >= wordsToRead.length) {
+        stopReading();
+        return;
+      }
+      
+      const word = wordsToRead[currentIndex];
+      showStatus('readingStatus', `再生中: ${currentIndex + 1} / ${wordsToRead.length}`, 'success');
+      
+      const sequence = [];
+      
+      // 読み上げ項目を順に追加
+      if (document.getElementById('readEnglish').checked && word.english) {
+        sequence.push({
+          text: word.english,
+          lang: 'en-US',
+          rate: parseFloat(document.getElementById('englishSpeed').value)
+        });
+      }
+      
+      if (document.getElementById('readEnglishSlow').checked && word.english) {
+        sequence.push({
+          text: word.english,
+          lang: 'en-US',
+          rate: parseFloat(document.getElementById('englishSlowSpeed').value)
+        });
+      }
+      
+      if (document.getElementById('readJapanese').checked && word.japanese) {
+        sequence.push({
+          text: word.japanese,
+          lang: 'ja-JP',
+          rate: 1.0
+        });
+      }
+      
+      if (document.getElementById('readExample').checked && word.example) {
+        sequence.push({
+          text: word.example,
+          lang: 'en-US',
+          rate: parseFloat(document.getElementById('englishSpeed').value)
+        });
+      }
+      
+      if (document.getElementById('readExampleJp').checked && word.exampleJp) {
+        sequence.push({
+          text: word.exampleJp,
+          lang: 'ja-JP',
+          rate: 1.0
+        });
+      }
+      
+      speakSequence(sequence, 0);
+    }
+    
+    function speakSequence(sequence, index) {
+      if (!isReading || index >= sequence.length) {
+        // 次の単語へ
+        const pauseDuration = parseFloat(document.getElementById('pauseDuration').value) * 1000;
+        setTimeout(function() {
+          currentIndex++;
+          readNextWord();
+        }, pauseDuration);
+        return;
+      }
+      
+      const item = sequence[index];
+      const utterance = new SpeechSynthesisUtterance(item.text);
+      utterance.lang = item.lang;
+      utterance.rate = item.rate;
+      
+      utterance.onend = function() {
+        speakSequence(sequence, index + 1);
+      };
+      
+      window.speechSynthesis.speak(utterance);
+    }
+    
+    function stopReading() {
+      isReading = false;
+      window.speechSynthesis.cancel();
+      showStatus('readingStatus', '停止しました', 'success');
+      setTimeout(function() {
+        document.getElementById('readingStatus').style.display = 'none';
+      }, 2000);
+    }
+    
+    // チャレンジ
+    function openChallenge() {
+      google.script.run.startChallenge();
+    }
+    
+    // ステータス表示
+    function showStatus(elementId, message, type) {
+      const statusEl = document.getElementById(elementId);
+      statusEl.textContent = message;
+      statusEl.className = 'status ' + type;
+      
+      if (type === 'success') {
+        setTimeout(function() {
+          statusEl.style.display = 'none';
+        }, 3000);
+      }
+    }
+  </script>
+</body>
+</html>

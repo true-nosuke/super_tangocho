@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <style>
+    body {
+      font-family: 'メイリオ', Meiryo, sans-serif;
+      padding: 20px;
+      margin: 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    }
+    
+    h1 {
+      text-align: center;
+      color: #667eea;
+      margin-bottom: 30px;
+      font-size: 28px;
+    }
+    
+    .setup {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+    
+    .setup h2 {
+      margin-top: 0;
+      font-size: 18px;
+      color: #333;
+    }
+    
+    label {
+      display: block;
+      margin: 15px 0 5px 0;
+      font-weight: bold;
+      color: #555;
+    }
+    
+    select, input[type="number"] {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #ddd;
+      border-radius: 5px;
+      font-size: 14px;
+      box-sizing: border-box;
+      transition: border-color 0.3s;
+    }
+    
+    select:focus, input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    
+    .checkbox-group {
+      margin: 10px 0;
+      padding: 10px;
+      background: white;
+      border-radius: 5px;
+    }
+    
+    .checkbox-group input {
+      margin-right: 8px;
+    }
+    
+    .checkbox-group label {
+      display: inline;
+      font-weight: normal;
+      margin: 0;
+    }
+    
+    button {
+      width: 100%;
+      padding: 15px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .btn-start {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .btn-start:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-start:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .question-area {
+      display: none;
+      text-align: center;
+    }
+    
+    .progress {
+      background: #f0f0f0;
+      height: 30px;
+      border-radius: 15px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      width: 0%;
+      transition: width 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+    }
+    
+    .question-text {
+      font-size: 24px;
+      font-weight: bold;
+      color: #333;
+      margin: 30px 0;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 10px;
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .choices {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin: 30px 0;
+    }
+    
+    .choice-btn {
+      padding: 20px;
+      background: white;
+      border: 3px solid #ddd;
+      color: #333;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .choice-btn:hover {
+      border-color: #667eea;
+      background: #f0f4ff;
+      transform: scale(1.05);
+    }
+    
+    .choice-btn.correct {
+      background: #d4edda;
+      border-color: #28a745;
+      animation: correct 0.5s;
+    }
+    
+    .choice-btn.incorrect {
+      background: #f8d7da;
+      border-color: #dc3545;
+      animation: incorrect 0.5s;
+    }
+    
+    @keyframes correct {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+    
+    @keyframes incorrect {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-10px); }
+      75% { transform: translateX(10px); }
+    }
+    
+    .result {
+      display: none;
+      text-align: center;
+      padding: 30px;
+    }
+    
+    .result h2 {
+      font-size: 32px;
+      margin-bottom: 20px;
+    }
+    
+    .result .score {
+      font-size: 48px;
+      font-weight: bold;
+      color: #667eea;
+      margin: 20px 0;
+    }
+    
+    .result .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin: 30px 0;
+    }
+    
+    .stat-box {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 10px;
+    }
+    
+    .stat-box .label {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 5px;
+    }
+    
+    .stat-box .value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #333;
+    }
+    
+    .feedback {
+      margin: 20px 0;
+      padding: 15px;
+      border-radius: 8px;
+      display: none;
+    }
+    
+    .feedback.show {
+      display: block;
+    }
+    
+    .feedback.correct {
+      background: #d4edda;
+      color: #155724;
+    }
+    
+    .feedback.incorrect {
+      background: #f8d7da;
+      color: #721c24;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎯 ４択チャレンジ</h1>
+    
+    <!-- 設定エリア -->
+    <div id="setupArea" class="setup">
+      <h2>チャレンジ設定</h2>
+      
+      <label>問題タイプ</label>
+      <select id="questionType">
+        <option value="en-to-jp">英語 → 日本語</option>
+        <option value="jp-to-en">日本語 → 英語</option>
+        <option value="example">例文穴埋め</option>
+      </select>
+      
+      <label>出題範囲</label>
+      <select id="scope">
+        <option value="all">すべてのシート</option>
+        <option value="current">選択中のシート</option>
+      </select>
+      
+      <label>問題数</label>
+      <select id="questionCount">
+        <option value="10">10問</option>
+        <option value="50">50問</option>
+        <option value="100">100問</option>
+      </select>
+      
+      <div class="checkbox-group">
+        <input type="checkbox" id="prioritizeWeak">
+        <label for="prioritizeWeak">苦手な単語を優先</label>
+      </div>
+      
+      <div class="checkbox-group">
+        <input type="checkbox" id="prioritizeOld">
+        <label for="prioritizeOld">前回学習から時間が経った単語を優先</label>
+      </div>
+      
+      <button class="btn-start" onclick="startChallenge()">チャレンジ開始</button>
+    </div>
+    
+    <!-- 問題エリア -->
+    <div id="questionArea" class="question-area">
+      <div class="progress">
+        <div id="progressBar" class="progress-bar">0 / 0</div>
+      </div>
+      
+      <div id="questionText" class="question-text">読み込み中...</div>
+      
+      <div id="feedback" class="feedback"></div>
+      
+      <div id="choices" class="choices"></div>
+    </div>
+    
+    <!-- 結果エリア -->
+    <div id="resultArea" class="result">
+      <h2>🎉 チャレンジ完了！</h2>
+      
+      <div class="score">
+        <span id="finalScore">0</span>%
+      </div>
+      
+      <div class="stats">
+        <div class="stat-box">
+          <div class="label">正解</div>
+          <div class="value" id="correctCount">0</div>
+        </div>
+        <div class="stat-box">
+          <div class="label">不正解</div>
+          <div class="value" id="incorrectCount">0</div>
+        </div>
+        <div class="stat-box">
+          <div class="label">合計</div>
+          <div class="value" id="totalCount">0</div>
+        </div>
+      </div>
+      
+      <button class="btn-start" onclick="resetChallenge()">もう一度挑戦</button>
+    </div>
+  </div>
+
+  <script>
+    let questions = [];
+    let currentQuestionIndex = 0;
+    let correctCount = 0;
+    let incorrectCount = 0;
+    let isAnswered = false;
+    
+    function startChallenge() {
+      const config = {
+        questionType: document.getElementById('questionType').value,
+        scope: document.getElementById('scope').value,
+        questionCount: parseInt(document.getElementById('questionCount').value),
+        prioritizeWeak: document.getElementById('prioritizeWeak').checked,
+        prioritizeOld: document.getElementById('prioritizeOld').checked
+      };
+      
+      document.getElementById('setupArea').style.display = 'none';
+      document.getElementById('questionArea').style.display = 'block';
+      
+      google.script.run
+        .withSuccessHandler(function(data) {
+          if (!data || data.length === 0) {
+            alert('問題データがありません');
+            resetChallenge();
+            return;
+          }
+          
+          questions = data;
+          currentQuestionIndex = 0;
+          correctCount = 0;
+          incorrectCount = 0;
+          
+          showQuestion();
+        })
+        .withFailureHandler(function(error) {
+          alert('エラー: ' + error.message);
+          resetChallenge();
+        })
+        .getChallengeData(config);
+    }
+    
+    function showQuestion() {
+      if (currentQuestionIndex >= questions.length) {
+        showResult();
+        return;
+      }
+      
+      isAnswered = false;
+      const question = questions[currentQuestionIndex];
+      
+      // 進捗バーを更新
+      const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+      document.getElementById('progressBar').style.width = progress + '%';
+      document.getElementById('progressBar').textContent = `${currentQuestionIndex + 1} / ${questions.length}`;
+      
+      // 問題文を表示
+      document.getElementById('questionText').textContent = question.questionText;
+      
+      // フィードバックを非表示
+      document.getElementById('feedback').className = 'feedback';
+      
+      // 選択肢を表示
+      const choicesDiv = document.getElementById('choices');
+      choicesDiv.innerHTML = '';
+      
+      question.choices.forEach((choice, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.textContent = choice;
+        btn.onclick = function() { checkAnswer(choice); };
+        choicesDiv.appendChild(btn);
+      });
+    }
+    
+    function checkAnswer(selectedAnswer) {
+      if (isAnswered) return;
+      isAnswered = true;
+      
+      const question = questions[currentQuestionIndex];
+      const isCorrect = selectedAnswer === question.correctAnswer;
+      
+      if (isCorrect) {
+        correctCount++;
+      } else {
+        incorrectCount++;
+      }
+      
+      // 選択肢の色を変える
+      const choiceBtns = document.querySelectorAll('.choice-btn');
+      choiceBtns.forEach(btn => {
+        if (btn.textContent === question.correctAnswer) {
+          btn.classList.add('correct');
+        } else if (btn.textContent === selectedAnswer) {
+          btn.classList.add('incorrect');
+        }
+        btn.disabled = true;
+      });
+      
+      // フィードバックを表示
+      const feedbackEl = document.getElementById('feedback');
+      feedbackEl.className = 'feedback show ' + (isCorrect ? 'correct' : 'incorrect');
+      feedbackEl.textContent = isCorrect ? '✅ 正解！' : `❌ 不正解。正解は「${question.correctAnswer}」です。`;
+      
+      // 回答を記録
+      google.script.run.recordAnswer(question.wordData, isCorrect);
+      
+      // 次の問題へ
+      setTimeout(function() {
+        currentQuestionIndex++;
+        showQuestion();
+      }, 2000);
+    }
+    
+    function showResult() {
+      document.getElementById('questionArea').style.display = 'none';
+      document.getElementById('resultArea').style.display = 'block';
+      
+      const total = correctCount + incorrectCount;
+      const score = total > 0 ? Math.round((correctCount / total) * 100) : 0;
+      
+      document.getElementById('finalScore').textContent = score;
+      document.getElementById('correctCount').textContent = correctCount;
+      document.getElementById('incorrectCount').textContent = incorrectCount;
+      document.getElementById('totalCount').textContent = total;
+    }
+    
+    function resetChallenge() {
+      document.getElementById('setupArea').style.display = 'block';
+      document.getElementById('questionArea').style.display = 'none';
+      document.getElementById('resultArea').style.display = 'none';
+      
+      questions = [];
+      currentQuestionIndex = 0;
+      correctCount = 0;
+      incorrectCount = 0;
+      isAnswered = false;
+    }
+  </script>
+</body>
+</html>
